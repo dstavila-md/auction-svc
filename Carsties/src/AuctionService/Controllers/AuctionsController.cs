@@ -3,6 +3,7 @@ using AuctionService.Data;
 using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,10 +22,28 @@ public class AuctionsController : ControllerBase
 	}
 
 	[HttpGet]
-	public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions()
-	{
-		var auctions = await this._context.Auctions.Include(x => x.Item).OrderBy(x => x.Item.Make).ToListAsync();
-		return this._mapper.Map<List<AuctionDto>>(auctions);
+	public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions(string date)
+	{// The GetAllAuctions method retrieves a list of auctions from the database, 
+	 // optionally filtering them based on an updated date provided as a query parameter. 
+	 // It uses Entity Framework Core to query the Auctions DbSet, 
+	 // applying an optional filter to return only auctions that have been updated after the specified date. 
+	 // The results are then projected to a list of AuctionDto objects using AutoMapper before being returned to the client.
+
+
+		// The method starts by creating a queryable collection of auctions from the database,
+		// ordered by the Make property of the associated Item.
+		var query = this._context.Auctions.OrderBy(x => x.Item.Make).AsQueryable();
+
+		if (!string.IsNullOrEmpty(date))
+		{
+			// If a date is provided as a query parameter, the method applies a filter to the query to return only auctions
+			// that have been updated after the specified date.
+			query = query.Where(x => x.UpdatedAt.CompareTo(DateTime.Parse(date).ToUniversalTime()) > 0);
+		}
+
+		// Finally, the method projects the resulting auctions to a list of AuctionDto objects using AutoMapper's ProjectTo method,
+		// which allows for efficient querying and mapping in a single step, and returns the list to the client.
+		return await query.ProjectTo<AuctionDto>(this._mapper.ConfigurationProvider).ToListAsync();
 	}
 	[HttpGet("{id}")]
 	public async Task<ActionResult<AuctionDto>> GetAuctionById(Guid id)

@@ -1,9 +1,12 @@
 using SearchService.Data;
+using SearchService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddHttpClient<AuctionSvcHttpClient>();
 
 // build the app
 var app = builder.Build();
