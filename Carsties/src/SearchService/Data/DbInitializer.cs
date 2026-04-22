@@ -22,6 +22,7 @@ public class DbInitializer
 
 		var count = await DB.CountAsync<Item>();
 
+		// Creating a scope to resolve the AuctionSvcHttpClient service, which is used to fetch items from the Auction Service API.
 		using var scope = app.Services.CreateScope();
 		var httpClient = scope.ServiceProvider.GetRequiredService<AuctionSvcHttpClient>();
 		var items = await httpClient.GetItemsForSearchDb();
