@@ -1,6 +1,4 @@
-using MongoDB.Driver;
-using MongoDB.Entities;
-using SearchService.Models;
+using SearchService.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,14 +13,13 @@ app.UseAuthorization();
 // Map controllers to handle incoming requests
 app.MapControllers();
 
-// Initialize MongoDB connection and set up the database
-await DB.InitAsync("SearchDb", MongoClientSettings.FromConnectionString(builder.Configuration.GetConnectionString("MongoDbConnection")));
-
-// Create text index on Make, Model, and Color fields for efficient search
-await DB.Index<Item>()
-	.Key(x => x.Make, KeyType.Text)
-	.Key(x => x.Model, KeyType.Text)
-	.Key(x => x.Color, KeyType.Text)
-	.CreateAsync();
+try
+{
+	await DbInitializer.InitDb(app);
+}
+catch (Exception ex)
+{
+	Console.WriteLine($"Error initializing database: {ex.Message}");
+}
 
 app.Run();
