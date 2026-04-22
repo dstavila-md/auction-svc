@@ -1,6 +1,5 @@
 using System.Net;
 using Polly;
-using Polly.CircuitBreaker;
 using Polly.Extensions.Http;
 using SearchService.Data;
 using SearchService.Services;

@@ -94,8 +94,12 @@ public class AuctionsController : ControllerBase
 
 		// TODO: check seller is current user
 
+		// The method starts by attempting to find the auction with the specified ID in the database.
+		// If the auction is not found, it returns a NotFound response to the client.
 		this._context.Auctions.Remove(auction);
+		// If the auction is found, it is removed from the database context, and the changes are saved to the database.
 		var result = await this._context.SaveChangesAsync() > 0;
+		// Finally, the method checks if the save operation was successful and returns an appropriate response to the client.
 		if (!result) return BadRequest("Could not updated DB");
 		return Ok();
 	}
