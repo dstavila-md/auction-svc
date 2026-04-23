@@ -4,6 +4,8 @@ using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,10 +17,13 @@ public class AuctionsController : ControllerBase
 {
 	private readonly AuctionDbContext _context;
 	private readonly IMapper _mapper;
-	public AuctionsController(AuctionDbContext context, IMapper mapper)
+	private readonly IPublishEndpoint _publishEndpoint;
+
+	public AuctionsController(AuctionDbContext context, IMapper mapper, IPublishEndpoint publishEndpoint)
 	{
 		this._context = context;
 		this._mapper = mapper;
+		this._publishEndpoint = publishEndpoint;
 	}
 
 	[HttpGet]
@@ -61,8 +66,15 @@ public class AuctionsController : ControllerBase
 		auction.Seller = "test seller";
 		this._context.Auctions.Add(auction);
 		var result = await _context.SaveChangesAsync() > 0;
+
+		// publish auction created event (RabbitMQ)
+		// map back to AuctionDto
+		var newAuctionPub = this._mapper.Map<AuctionDto>(auction);
+		// map to AuctionCreated message (from Contracts) and publish to RabbitMQ
+		await this._publishEndpoint.Publish(this._mapper.Map<AuctionCreated>(newAuctionPub)); // _publishEndpoint
+
 		if (!result) return BadRequest("Failed to create auction");
-		return CreatedAtAction(nameof(GetAuctionById), new { id = auction.Id }, this._mapper.Map<AuctionDto>(auction));
+		return CreatedAtAction(nameof(GetAuctionById), new { id = auction.Id }, newAuctionPub);
 	}
 
 	[HttpPut("{id}")]
