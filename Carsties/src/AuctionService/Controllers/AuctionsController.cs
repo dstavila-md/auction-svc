@@ -65,7 +65,6 @@ public class AuctionsController : ControllerBase
 		// TODO: add current user as seller
 		auction.Seller = "test seller";
 		this._context.Auctions.Add(auction);
-		var result = await _context.SaveChangesAsync() > 0;
 
 		// publish auction created event (RabbitMQ)
 		// map back to AuctionDto
@@ -73,6 +72,10 @@ public class AuctionsController : ControllerBase
 		// map to AuctionCreated message (from Contracts) and publish to RabbitMQ
 		await this._publishEndpoint.Publish(this._mapper.Map<AuctionCreated>(newAuctionPub)); // _publishEndpoint
 
+		// save to databse - postgres
+		var result = await _context.SaveChangesAsync() > 0;
+
+		// communicate back to the client
 		if (!result) return BadRequest("Failed to create auction");
 		return CreatedAtAction(nameof(GetAuctionById), new { id = auction.Id }, newAuctionPub);
 	}
