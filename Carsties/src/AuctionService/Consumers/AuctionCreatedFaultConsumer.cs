@@ -12,7 +12,7 @@ public class AuctionCreatedFaultConsumer : IConsumer<Fault<AuctionCreated>>
 		var exception = context.Message.Exceptions.First();
 		if (exception.ExceptionType == "System.ArgumentException")
 		{
-			context.Message.Message.Model = "FooBar";
+			context.Message.Message.Model = "FooBar"; // only for testing purposes (example)
 			await context.Publish(context.Message.Message); // republish the message to the bus
 
 		}

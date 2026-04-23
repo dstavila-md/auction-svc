@@ -23,7 +23,7 @@ public class AuctionCreatedConsumer : IConsumer<AuctionCreated>
 		// Map the message to the Item model
 		var item = _mapper.Map<Item>(message);
 
-		if (item.Model == "Foo") throw new ArgumentException("Cannot sell cars with name of Foo");
+		if (item.Model == "Foo") throw new ArgumentException("Cannot sell cars with name of Foo"); // Only for testing purposes (example) -- will cause a fault to be thrown and handled
 
 		// Save item to database or search index
 		await item.SaveAsync(); // Assuming MongoDB or similar data
