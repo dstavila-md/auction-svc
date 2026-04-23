@@ -5,6 +5,7 @@ using SearchService.Data;
 using SearchService.Services;
 using MassTransit;
 using SearchService.Consumers;
+using Contracts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,11 @@ builder.Services.AddMassTransit(x =>
 
 	x.UsingRabbitMq((context, cfg) =>
 	{
+		cfg.ReceiveEndpoint("search-auction-created", e =>
+		{
+			e.UseMessageRetry(r => r.Interval(5, 5));
+			e.ConfigureConsumer<AuctionCreatedConsumer>(context);
+		});
 		// Configure RabbitMQ settings here
 		cfg.ConfigureEndpoints(context);
 	});
