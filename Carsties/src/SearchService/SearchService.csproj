@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.5.9" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" Version="11.0.0-preview.3.26207.106" />
     <PackageReference Include="MongoDB.Entities" Version="24.1.1" />
   </ItemGroup>
@@ -17,6 +18,10 @@
     <Folder Include="Models\" />
     <Folder Include="RequestHelpers\" />
     <Folder Include="Services\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
   </ItemGroup>
   
 </Project>

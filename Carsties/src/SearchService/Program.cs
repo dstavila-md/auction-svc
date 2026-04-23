@@ -3,6 +3,7 @@ using Polly;
 using Polly.Extensions.Http;
 using SearchService.Data;
 using SearchService.Services;
+using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,16 @@ builder.Services.AddControllers();
 
 // Register the AuctionSvcHttpClient with an HTTP client factory and attach the defined Polly policy for resilience.
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
+
+builder.Services.AddMassTransit(x =>
+{
+	// Register consumers here
+	x.UsingRabbitMq((context, cfg) =>
+	{
+		// Configure RabbitMQ settings here
+		cfg.ConfigureEndpoints(context);
+	});
+});
 
 // build the app
 var app = builder.Build();
