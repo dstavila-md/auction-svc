@@ -4,11 +4,14 @@ using Polly.Extensions.Http;
 using SearchService.Data;
 using SearchService.Services;
 using MassTransit;
+using SearchService.Consumers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 // Register the AuctionSvcHttpClient with an HTTP client factory and attach the defined Polly policy for resilience.
 builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolicy());
@@ -16,6 +19,11 @@ builder.Services.AddHttpClient<AuctionSvcHttpClient>().AddPolicyHandler(GetPolic
 builder.Services.AddMassTransit(x =>
 {
 	// Register consumers here
+	// This will automatically register all consumers in the same assembly as AuctionCreatedConsumer
+	x.AddConsumersFromNamespaceContaining<AuctionCreatedConsumer>();
+	// Configure the endpoint name formatter to use kebab-case for better readability in RabbitMQ
+	x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter("search", false));
+
 	x.UsingRabbitMq((context, cfg) =>
 	{
 		// Configure RabbitMQ settings here
