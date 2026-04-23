@@ -20,5 +20,7 @@ public class MappingProfiles : Profile
 		CreateMap<Auction, AuctionUpdated>().IncludeMembers(a => a.Item);
 		CreateMap<Item, AuctionUpdated>();
 
+		CreateMap<Auction, AuctionDeleted>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
+
 	}
 }
